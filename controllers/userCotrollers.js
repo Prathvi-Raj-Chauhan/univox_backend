@@ -28,7 +28,7 @@ async function handleUserRegistration(req, res){
 async function handleUserLogin(req, res){
     const{email, password} = req.body
     const user = await USER.findOne({email: email})
-    if(!user) return res.json({"Error" : "Not account exists with given email"})
+    if(!user) return res.status(404).json({"Error" : "No account exists with given email"})
     
     try {
         const token  = await USER.matchPasswordAndGenerateToken(email, password)
