@@ -2,12 +2,7 @@ const POST = require('../models/postModel')
 
 const {v2: cloudinary} = require("cloudinary")
 
-cloudinary.config({
-  cloud_name: 'djibbfemo',
-  api_key: '742914716442666',
-  
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+cloudinary.config();
 
 function uploadToCloudinary(fileBuffer, filename) {
   return new Promise((resolve, reject) => {
