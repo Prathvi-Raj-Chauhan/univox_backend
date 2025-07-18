@@ -3,15 +3,16 @@ const {handlePosting, getAllPosts, upvotePost, downvotePost, getCurrentUserPosts
 const router = Router()
 const multer = require('multer')
 const path = require("path")
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.resolve('./public/uploads/'))
-  },
-  filename: function (req, file, cb) {
-    const filename = `${Date.now()}-${file.originalname}`
-    cb(null,filename)
-  }
-})
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, path.resolve('./public/uploads/'))
+//   },
+//   filename: function (req, file, cb) {
+//     const filename = `${Date.now()}-${file.originalname}`
+//     cb(null,filename)
+//   }
+// })
+const storage = multer.memoryStorage() // now we will not write in disk but store in memory only until upload
 const upload = multer({ storage: storage })
 
 

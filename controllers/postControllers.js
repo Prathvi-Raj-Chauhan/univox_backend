@@ -1,5 +1,27 @@
 const POST = require('../models/postModel')
 
+const {v2: cloudinary} = require("cloudinary")
+
+cloudinary.config({
+  cloud_name: 'djibbfemo',
+  api_key: '742914716442666',
+  
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+function uploadToCloudinary(fileBuffer, filename) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'univox_posts', public_id: filename },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(fileBuffer);
+  });
+}
+
 
 async function handlePosting(req, res){
     const {title, postContent, isPublic, createdBy} = req.body
@@ -7,11 +29,23 @@ async function handlePosting(req, res){
     if (!title || !postContent || !isPublic) {
       return res.status(400).json({ status: "fail", message: "Missing fields" });
     }
+    let imageUrl = '';
+    if (req.file) {
+        try {
+        // Use original filename or generate your own
+        const filename = `${Date.now()}-${req.file.filename}`;
+        imageUrl = await uploadToCloudinary(req.file.buffer, filename);
+        } catch (err) {
+        return res.status(500).json({ status: "fail", message: "Image upload failed", error: err });
+        }
+    }
+
 
     const post = await POST.create({
         title: title,
         postContent: postContent,
-        coverImageURL:  req.file && req.file.filename ? `/uploads/${req.file.filename}` : '',
+        // coverImageURL:  req.file && req.file.filename ? `/uploads/${req.file.filename}` : '',
+        coverImageURL:  imageUrl,
         isPublic: isPublic,
         // createdBy: req.user._id
         createdBy: createdBy
