@@ -36,14 +36,20 @@ const userSchema = mongoose.Schema({
     username: {
          type: String,
          default: ''
-        }
+        },
+    otp: {
+        type: String,
+    },
+    otpCreatedAt: {
+        type: Date
+    }
 
 },{timestamps: true})
 
 userSchema.pre("save", function (next) { // this will run before saving the user
 
     const user = this
-    if(!user.isModified("password")) return // check if user has modiefied the field password
+    if(!user.isModified("password")) return next();// check if user has modiefied the field password
 
     const salt = randomBytes(16).toString("hex") // a random String of length 16 generate by randomBytes from crypto module
 

@@ -3,7 +3,6 @@ require('dotenv').config();
 const express = require("express")
 const mongoose = require("mongoose")
 const path = require("path")
-// mongoose.connect('mongodb://127.0.0.1:27017/college-forum')
 mongoose.connect(process.env.MONGODB_URI)
 .then(() => { console.log("mongodb connected successfully ") })
 .catch((e) => { console.log("error in conncecting to mongo db", e) })

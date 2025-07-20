@@ -1,8 +1,10 @@
 const USER = require('../models/userModel')
 
 const JWT = require("jsonwebtoken")
-
-const SECRET_KEY = "!@#$%^&*()_*&^%$#!@#$%^&*()"
+const {createHmac} = require("node:crypto") // builtin package for hashing of the password
+const SECRET_KEY = process.env.JWT_SECRET
+const {createTokenForUser} = require("../JWTservices/auth")
+const nodemailer = require("nodemailer")
 
 async function handleUserRegistration(req, res){
     const {email, password} = req.body
@@ -117,11 +119,89 @@ async function handleAccountUpdate(req, res) {
     }
 }
 
+async function handleSendingOtp(req, res){
+    const { email } = req.body;
 
+    try {
+    const user = await USER.findOne({ email });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("Generated OTP:", otp);
+    const salt = user.salt
+    const hashedOTP = createHmac('sha256', salt).update(otp).digest("hex")
+    user.otp = hashedOTP;
+    user.otpCreatedAt = new Date(); // current date
+    console.log("Before saving user");
+    await user.save();
+        console.log("User updated with OTP");
+    await sendEmail(email, otp);
+console.log("OTP email sent");
+    return res.json({ message: 'OTP sent successfully' });
+    } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Failed to send OTP' });
+    }
+}
+async function sendEmail(email, otp) {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'prcunivox@gmail.com',
+      pass: 'udtl yswv qugx dhyc',
+    },
+  });
+
+  await transporter.sendMail({
+    from: 'Univox <prcunivox@gmail.com>',
+    to: email,
+    subject: 'Your OTP for Univox',
+    text: `Your OTP is ${otp}. It is valid for 1 hour.`,
+  });
+}
+
+async function handleVerifyingOtp(req, res){
+    const { email, otp } = req.body;
+
+  try {
+    const user = await USER.findOne({ email });
+
+    const salt = user.salt
+    const hashedOTP = createHmac('sha256', salt).update(otp).digest("hex")
+    
+    if (!user || user.otp !== hashedOTP) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    // Check if OTP expired (after 1 hour)
+    const now = Date.now();
+    const otpCreated = new Date(user.otpCreatedAt).getTime();
+    const diff = now - otpCreated;
+
+    if (diff > 60 * 60 * 1000) {
+      return res.status(400).json({ message: 'OTP expired' });
+    }
+
+    // OTP is valid — clear OTP fields
+    user.otp = null;
+    user.otpCreatedAt = null;
+    await user.save();
+
+    // Issue JWT token
+
+    const token = createTokenForUser(user)
+
+    return res.json({"token" : token});
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Failed to verify OTP' });
+  }
+}
 
 module.exports = {
     handleUserRegistration,
     handleUserLogin,
     handleAccountSetup,
-    handleAccountUpdate
+    handleAccountUpdate,
+    handleSendingOtp,
+    handleVerifyingOtp
 }
