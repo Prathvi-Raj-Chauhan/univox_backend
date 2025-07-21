@@ -14,10 +14,6 @@ const userSchema = mongoose.Schema({
         type : String,
         required: true,
     },
-    profilePicURL : {
-        type: String,
-        default: '/uploads/default.png'
-    },
     salt : {
         type: String
     },
@@ -42,6 +38,10 @@ const userSchema = mongoose.Schema({
     },
     otpCreatedAt: {
         type: Date
+    },
+    profilePictureURL : {
+        type: String,
+        defualt: ""
     }
 
 },{timestamps: true})

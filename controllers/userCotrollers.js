@@ -6,6 +6,23 @@ const SECRET_KEY = process.env.JWT_SECRET
 const {createTokenForUser} = require("../JWTservices/auth")
 const nodemailer = require("nodemailer")
 
+const {v2: cloudinary} = require("cloudinary")
+
+cloudinary.config();
+
+function uploadToCloudinary(fileBuffer, filename) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'univox_users', public_id: filename },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(fileBuffer);
+  });
+}
+
 async function handleUserRegistration(req, res){
     const {email, password} = req.body
     await USER.create({
@@ -54,9 +71,20 @@ async function handleAccountSetup(req, res) {
         // const decoded = jwt.verify(token, 'SECRET_KEY');
         // const userId = decoded.id;
 
+        let profilePictureURL = '';
+        if (req.file) {
+            try {
+            // Use original filename or generate your own
+            const filename = `${Date.now()}-${req.file.filename}`;
+            profilePictureURL = await uploadToCloudinary(req.file.buffer, filename);
+            } catch (err) {
+            return res.status(500).json({ status: "fail", message: "Image upload failed", error: err });
+            }
+        }
+
         const user = await USER.findByIdAndUpdate(
             userId,
-            { college, branch, year, username },
+            { college, branch, year, username, profilePictureURL },
             { new: true }
         );
 
@@ -70,6 +98,7 @@ async function handleAccountSetup(req, res) {
         branch: user.branch,
         year: user.year,
         username: user.username,
+        profilePictureURL: profilePictureURL,
       },
       SECRET_KEY,
       { expiresIn: '1h' }
@@ -90,10 +119,20 @@ async function handleAccountUpdate(req, res) {
     try {
         // const decoded = jwt.verify(token, 'SECRET_KEY');
         // const userId = decoded.id;
+        let profilePictureURL = req.body.profilePictureURL;
+        if (req.file) {
+            try {
+            // Use original filename or generate your own
+            const filename = `${Date.now()}-${req.file.filename}`;
+            profilePictureURL = await uploadToCloudinary(req.file.buffer, filename);
+            } catch (err) {
+            return res.status(500).json({ status: "fail", message: "Image upload failed", error: err });
+            }
+        }
 
         const user = await USER.findByIdAndUpdate(
             userId,
-            { college, branch, year, username , email},
+            { college, branch, year, username , email, profilePictureURL},
             { new: true }
         );
 
@@ -107,6 +146,7 @@ async function handleAccountUpdate(req, res) {
         branch: user.branch,
         year: user.year,
         username: user.username,
+        profilePictureURL: profilePictureURL
       },
       SECRET_KEY,
       { expiresIn: '1h' }
