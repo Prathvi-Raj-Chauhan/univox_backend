@@ -4,6 +4,8 @@ const app = express()
 const multer = require('multer')
 const {handleUserRegistration, handleUserLogin, handleAccountSetup, handleAccountUpdate, handleSendingOtp, handleVerifyingOtp} = require('../controllers/userCotrollers')
 
+
+
 const ROUTER = express.Router()
 
 const storage = multer.memoryStorage() // now we will not write in disk but store in memory only until upload
