@@ -191,12 +191,17 @@ async function sendEmail(email, otp) {
     },
   });
 
-  await transporter.sendMail({
-    from: 'Univox <prcunivox@gmail.com>',
-    to: email,
-    subject: 'Your OTP for Univox',
-    text: `Your OTP is ${otp}. It is valid for 1 hour.`,
-  });
+  try {
+    let info = await transporter.sendMail({
+      from: 'Univox <prcunivox@gmail.com>',
+      to: email,
+      subject: 'Your OTP for Univox',
+      text: `Your OTP is ${otp}. It is valid for 1 hour.`,
+    });
+    console.log('Email sent:', info.response);
+  } catch (err) {
+    console.error('Error sending email:', err);
+  }
 }
 
 async function handleVerifyingOtp(req, res){
