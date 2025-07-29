@@ -98,7 +98,7 @@ async function handleAccountSetup(req, res) {
         branch: user.branch,
         year: user.year,
         username: user.username,
-        profilePictureURL: profilePicture,
+        profilePictureURL: profilePictureURL,
       },
       SECRET_KEY,
       { expiresIn: '1h' }
@@ -107,7 +107,9 @@ async function handleAccountSetup(req, res) {
         return res.json({ status: 'success', userToken });
     } catch (err) {
         console.error(err);
-        return res.status(401).json({ error: 'Invalid userId' });
+        return res.status(401).json({ error: 'Invalid userId',
+          
+         });
     }
 }
 
