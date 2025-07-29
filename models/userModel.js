@@ -80,7 +80,7 @@ userSchema.static('matchPasswordAndGenerateToken', async function(email, passwor
         throw new Error('Incorrect Password or email')
     }
 
-    // return {...user, password: undefined, salt: undefined} // instead for returning user we will return its token
+    // return {...user, password: undefined, salt: undefined.....} // instead for returning user we will return its token
     
     const token = createTokenForUser(user)
     return token;

@@ -11,6 +11,7 @@ function createTokenForUser(user){
         year: user.year,
         username: user.username,
         _id: user._id,
+        verified: user.verified
     }
     const token = JWT.sign(payload, secretKey, {
         expiresIn: "10d" // expires in 1 hour
