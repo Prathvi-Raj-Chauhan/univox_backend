@@ -13,7 +13,7 @@ function createTokenForUser(user){
         _id: user._id,
     }
     const token = JWT.sign(payload, secretKey, {
-        expiresIn: "1h" // expires in 1 hour
+        expiresIn: "10d" // expires in 1 hour
     })
     return token
 }
