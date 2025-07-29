@@ -98,7 +98,7 @@ async function handleAccountSetup(req, res) {
         branch: user.branch,
         year: user.year,
         username: user.username,
-        profilePictureURL: profilePictureURL,
+        profilePictureURL: profilePicture,
       },
       SECRET_KEY,
       { expiresIn: '1h' }
@@ -218,15 +218,16 @@ async function handleVerifyingOtp(req, res){
     const diff = now - otpCreated;
 
     if (diff > 60 * 60 * 1000) {
-      return res.status(400).json({ message: 'OTP expired' });
+      return res.status(401).json({ message: 'OTP expired' });
     }
 
     // OTP is valid — clear OTP fields
     user.otp = null;
+    user.verified = true;
     user.otpCreatedAt = null;
     await user.save();
 
-    // Issue JWT token
+    // creating new JWT token
 
     const token = createTokenForUser(user)
 

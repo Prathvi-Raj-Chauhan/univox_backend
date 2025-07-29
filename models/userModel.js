@@ -42,6 +42,10 @@ const userSchema = mongoose.Schema({
     profilePictureURL : {
         type: String,
         defualt: ""
+    },
+    verified: {
+        type: Boolean,
+        default: false,
     }
 
 },{timestamps: true})
