@@ -186,8 +186,8 @@ async function sendEmail(email, otp) {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'prcunivox@gmail.com',
-      pass: 'udtl yswv qugx dhyc',
+      user: process.env.EMAILER_USER,
+      pass: process.env.EMAILER_PASS,
     },
   });
 
